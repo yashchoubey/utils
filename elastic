@@ -1,0 +1,158 @@
+DELETE haikuinfo
+
+
+
+DELETE stemminganalyzertest
+
+GET /haiku/_search
+{
+  "query": {
+    "match": {"text":{"query":"sky"}}
+  }
+}
+
+PUT /stemminganalyzertest
+{
+    "settings": {
+        "analysis" : {
+            "analyzer" : {
+                "englishstemmeranalyzer" : {
+                    "tokenizer" : "standard",
+                    "filter" : ["lowercase", "english_stemmer"]
+                }
+            },
+            "filter" : {
+                "english_stemmer" : {
+                    "type" : "stemmer",
+                    "name" : "english"
+                }
+            }
+        }
+    }
+}
+
+PUT haiku
+
+
+POST /haiku/_doc
+{"text":"sky"}
+
+POST /haiku/_doc
+{"text":"skies"}
+
+POST /haiku/_doc
+{"text":"skys"}
+
+PUT index_4_analysis
+{
+   "settings": {
+      "analysis": {
+         "analyzer": {
+            "my_english_analyzer": {
+               "type": "standard",
+               "max_token_length": 5,
+               "stopwords": "_english_"
+            }
+         }
+      }
+   }
+}
+
+
+POST index_4_analysis/_analyze
+{
+   "analyzer": "my_english_analyzer",
+   "text": "Today's weather is beautiful"
+}
+
+
+
+
+#############################################
+
+DELETE haikuinfo
+
+PUT haikuinfo
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "english_exact": {
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "properties": {
+      "haikutext": {
+        "type": "text",
+        "analyzer": "english",
+        "fields": {
+          "exact": {
+            "type": "text",
+            "analyzer": "english_exact"
+          }
+        }
+      },
+      "lastUpdatedTime":{
+        "type":"long"
+      },
+      "id":{
+        "type":"text"
+      }
+    }
+  }
+}
+
+PUT haikuinfo/_doc/1
+{
+  "haikutext": "test haiku",
+  "lastUpdatedTime":11,
+  "id":"1"
+}
+
+PUT haikuinfo/_doc/2
+{
+  "haikutext": "tested haiku",
+  "lastUpdatedTime":22,
+  "id":"2"
+}
+
+PUT haikuinfo/_doc/3
+{
+  "haikutext": "testing haiku",
+  "lastUpdatedTime":33,
+  "id":"3"
+  
+}
+PUT haikuinfo/_doc/4
+{
+  "haikutext": "tests haiku",
+  "lastUpdatedTime":44,
+  "id":"4"
+}
+
+
+POST haikuinfo/_refresh
+
+GET haikuinfo/_search
+{
+  "query": {
+    "simple_query_string": {
+      "fields": [ "haikutext"],
+      "query": "tested"
+    }
+  },
+  "sort": [
+      {
+        "lastUpdatedTime": {
+          "order": "desc"
+        }
+      }
+    ]
+}
+
