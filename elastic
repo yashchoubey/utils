@@ -1,3 +1,4 @@
+
 DELETE haikuinfo
 
 
@@ -101,12 +102,27 @@ PUT haikuinfo
       "lastUpdatedTime":{
         "type":"long"
       },
-      "id":{
+      "haikuId":{
         "type":"text"
       }
     }
   }
 }
+
+GET _search
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
+GET _count
+{
+  "query": {
+    "match_all": {}
+  }
+}
+
 
 PUT haikuinfo/_doc/1
 {
@@ -131,7 +147,7 @@ PUT haikuinfo/_doc/3
 }
 PUT haikuinfo/_doc/4
 {
-  "haikutext": "tests haiku",
+  "haikutext": "tests haikus",
   "lastUpdatedTime":44,
   "id":"4"
 }
@@ -142,9 +158,12 @@ POST haikuinfo/_refresh
 GET haikuinfo/_search
 {
   "query": {
-    "simple_query_string": {
+    "query_string": {
       "fields": [ "haikutext"],
-      "query": "tested"
+      
+      "quote_field_suffix": ".exact",
+      "query": "\"virat kohli\""
+      
     }
   },
   "sort": [
@@ -156,3 +175,58 @@ GET haikuinfo/_search
     ]
 }
 
+GET haikuinfo/_search?pretty
+{
+  
+  "sort": [
+      {
+        "lastUpdatedTime": {
+          "order": "desc"
+        }
+      }
+    ]
+}
+
+GET haikuinfo/_search
+{
+  "query": {
+      "bool":{
+      "filter": {
+        "term": {"id":"5ddc01d75561e056b308e444"}
+      }
+    }
+  }
+}
+
+GET haikuinfo/_count
+{
+  "query": {
+    "query_string": {
+      "fields": [ "haikutext"],
+      "query": "kohli"
+    }
+  }
+}
+
+POST /haikuinfo/_delete_by_query
+{
+  "query": {
+        "range" : {
+            "lastUpdatedTime" : {
+                "gt" : 1574722990611
+            }
+        }
+    }
+}
+
+
+GET /haikuinfo/_count
+{
+    "query": {
+        "range" : {
+            "lastUpdatedTime" : {
+                "gt" : 1574722990611
+            }
+        }
+    }
+}
